@@ -1,0 +1,104 @@
+name: Terraform (training)
+
+on:
+  pull_request:
+    paths: [ "infra/**" ]
+  push:
+    branches: [ "main" ]
+    paths: [ "infra/**" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_DIR: infra/env/training
+
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-tf-plugins-${{ hashFiles('**/.terraform.lock.hcl') }}
+
+
+      - name: Fmt & Validate
+        run: |
+          terraform -chdir=${{ env.TF_DIR }} fmt -check -recursive
+          terraform -chdir=${{ env.TF_DIR }} init -input=false -no-color
+          terraform -chdir=${{ env.TF_DIR }} validate -no-color
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+
+      - name: Plan
+        run: terraform -chdir=${{ env.TF_DIR }} plan -input=false -no-color -out=plan.out
+        env:
+          ARM_USE_OIDC: true
+          ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_DIR }}/plan.out
+
+  apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    env:
+      TF_DIR: infra/env/training
+      TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+      ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: ${{ runner.os }}-tf-plugins-${{ hashFiles('**/.terraform.lock.hcl') }}
+
+
+      - name: Init
+        run: terraform -chdir=${{ env.TF_DIR }} init -input=false -no-color
+
+      - name: Plan
+        run: terraform -chdir=${{ env.TF_DIR }} plan -input=false -no-color -lock-timeout=60s -out=tfplan
+
+      - name: Apply
+        run: terraform -chdir=${{ env.TF_DIR }} apply -no-color -auto-approve tfplan
