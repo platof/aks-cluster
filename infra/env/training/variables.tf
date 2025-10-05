@@ -16,7 +16,7 @@ variable "resource_group_name" {
 variable "vnet_cidr" {
   description = "CIDR for the VNet."
   type        = string
-  
+
 }
 
 variable "aks_subnet_cidr" {

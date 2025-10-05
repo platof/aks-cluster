@@ -42,7 +42,7 @@ resource "azurerm_nat_gateway_public_ip_association" "assoc" {
 
 # Attach NAT GW to AKS subnet (drives outbound through this IP)
 resource "azurerm_subnet_nat_gateway_association" "aks" {
-  count        = var.create_nat_gateway ? 1 : 0
-  subnet_id    = azurerm_subnet.aks.id
+  count          = var.create_nat_gateway ? 1 : 0
+  subnet_id      = azurerm_subnet.aks.id
   nat_gateway_id = azurerm_nat_gateway.ngw[0].id
 }
