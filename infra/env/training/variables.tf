@@ -35,3 +35,23 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "node_count" {
+  description = "The number of nodes in the default node pool."
+  type        = number
+}
+
+variable "vm_size" {
+  description = "The size of the VMs in the default node pool."
+  type        = string
+}
+
+variable "node_resource_group" {
+  description = "The name of the resource group to create and manage the cluster's resources."
+  type        = string
+}
+
+variable "k8s_version" {
+  description = "The Kubernetes version to use for the AKS cluster."
+  type        = string
+}
