@@ -8,20 +8,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   kubernetes_version = var.k8s_version
 
-  oidc_issuer_enabled = true
+  oidc_issuer_enabled       = true
   workload_identity_enabled = true
-  node_resource_group = var.node_resource_group
+  node_resource_group       = var.node_resource_group
 
   default_node_pool {
-    name       = "system"
-    type = "VirtualMachineScaleSets"
-    node_count = var.node_count
-    vm_size    = var.vm_size
-    vnet_subnet_id = azurerm_subnet.aks.id
+    name                         = "system"
+    type                         = "VirtualMachineScaleSets"
+    node_count                   = var.node_count
+    vm_size                      = var.vm_size
+    vnet_subnet_id               = azurerm_subnet.aks.id
     only_critical_addons_enabled = true
-    max_pods = 30
+    max_pods                     = 30
     upgrade_settings {
-        max_surge = "33%"
+      max_surge = "33%"
     }
   }
 
@@ -30,12 +30,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 
   network_profile {
-    network_plugin    = "azure"
+    network_plugin      = "azure"
     network_plugin_mode = "overlay"
-    network_data_plane   = "cilium"
-    network_policy = "cilium"
-    load_balancer_sku = "standard"
-    outbound_type    = "userAssignedNATGateway"
+    network_data_plane  = "cilium"
+    network_policy      = "cilium"
+    load_balancer_sku   = "standard"
+    outbound_type       = "userAssignedNATGateway"
   }
 
   tags = {
