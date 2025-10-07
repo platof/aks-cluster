@@ -19,7 +19,16 @@ jobs:
   destroy:
     if: github.event.inputs.confirm == 'DELETE'
     runs-on: ubuntu-latest
+    
 
+    env:
+      TF_DIR: infra/env/training
+      TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+      ARM_USE_OIDC: true
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      
     steps:
       - uses: actions/checkout@v4
 
