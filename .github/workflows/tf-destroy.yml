@@ -1,0 +1,55 @@
+name: Terraform Destroy (training)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DELETE to confirm destroying infra/env/training'
+        required: true
+        default: ''
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  TF_DIR: infra/env/training
+
+jobs:
+  destroy:
+    if: github.event.inputs.confirm == 'DELETE'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.3
+
+      # Optional but nice: cache TF plugins
+      - name: Setup Terraform plugin cache
+        run: |
+          echo "TF_PLUGIN_CACHE_DIR=$RUNNER_TEMP/tf-plugin-cache" >> $GITHUB_ENV
+          mkdir -p "$RUNNER_TEMP/tf-plugin-cache"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: ${{ runner.os }}-tfplugins-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-tfplugins-
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id:  ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        run: terraform -chdir=${{ env.TF_DIR }} init -input=false -no-color
+
+      - name: Plan Destroy
+        run: terraform -chdir=${{ env.TF_DIR }} plan -destroy -input=false -no-color -out=tfdestroy.out
+
+      - name: Apply Destroy
+        run: terraform -chdir=${{ env.TF_DIR }} apply -no-color -auto-approve tfdestroy.out
