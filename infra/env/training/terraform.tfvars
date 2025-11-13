@@ -8,3 +8,4 @@ node_count          = 1
 vm_size             = "Standard_D4s_v3"
 node_resource_group = "aks-nodes-rg"
 k8s_version         = "1.33.3"
+node_nsg_name       = "aks-agentpool-38013542-nsg"
