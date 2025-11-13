@@ -2,10 +2,10 @@ name: Terraform (training)
 
 on:
   pull_request:
-    paths: [ "infra/**" ]
+    paths: [ "infra/**", '.github/workflows/terraform.yml' ]
   push:
     branches: [ "main" ]
-    paths: [ "infra/**" ]
+    paths: [ "infra/**", '.github/workflows/terraform.yml' ]
 
 permissions:
   id-token: write
@@ -13,6 +13,7 @@ permissions:
 
 env:
   TF_DIR: infra/env/training
+  TF_VAR_jumpbox_ssh_public_key: ${{ secrets.JUMPBOX_SSH_PUBKEY }}
 
 jobs:
   plan:
@@ -75,6 +76,8 @@ jobs:
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_jumpbox_ssh_public_key: ${{ secrets.JUMPBOX_SSH_PUBKEY }}
+      TF_VAR_admin_username: adminuser
 
     steps:
       - uses: actions/checkout@v4
