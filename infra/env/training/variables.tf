@@ -67,12 +67,3 @@ variable "jumpbox_ssh_public_key" {
   type        = string
 }
 
-variable "traefik_chart_version" {
-  description = "Version of the ingress-nginx Helm chart to deploy."
-  type        = string
-}
-
-variable "node_nsg_name" {
-  description = "The name of the Network Security Group associated with the AKS node pool."
-  type        = string
-}
