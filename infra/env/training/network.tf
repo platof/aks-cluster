@@ -46,3 +46,61 @@ resource "azurerm_subnet_nat_gateway_association" "aks" {
   subnet_id      = azurerm_subnet.aks.id
   nat_gateway_id = azurerm_nat_gateway.ngw[0].id
 }
+
+# Allow NodePort range from the Azure LB
+#resource "azurerm_network_security_rule" "allow_nodeports_from_az_lb" {
+#  name                        = "allow-aks-nodeports"
+#  resource_group_name         = var.node_resource_group
+#  network_security_group_name = var.node_nsg_name
+#  priority                    = 401
+#  direction                   = "Inbound"
+#  access                      = "Allow"
+#  protocol                    = "Tcp"
+#  source_port_range           = "*"
+#  destination_port_ranges     = ["30000-32767"] # Traefik websecure nodePort
+#  source_address_prefix       = "AzureLoadBalancer"
+#  destination_address_prefix  = "*"
+#}
+
+#resource "azurerm_network_security_rule" "allow_kube_proxy_probe" {
+#  name                        = "allow-aks-kube-proxy-probe"
+#  resource_group_name         = var.node_resource_group
+#  network_security_group_name = var.node_nsg_name
+#  priority                    = 399
+#  direction                   = "Inbound"
+#  access                      = "Allow"
+#  protocol                    = "Tcp"
+#  source_port_range           = "*"
+#  source_address_prefix       = "AzureLoadBalancer"
+#  destination_address_prefix  = "*"
+#  destination_port_range      = "10256"
+#}
+
+#resource "azurerm_network_security_rule" "allow_office_to_aks" {
+#  name                        = "allow-office-to-aks"
+#  resource_group_name         = var.node_resource_group
+#  network_security_group_name = var.node_nsg_name
+#  priority                    = 101
+#  direction                   = "Inbound"
+#  access                      = "Allow"
+# protocol                    = "Tcp"
+#  source_port_range           = "*"
+#  destination_port_ranges     = ["80", "443"]
+#  source_address_prefix       = "195.2.160.150/32" # office IP range
+# destination_address_prefix  = "*"
+#}
+
+# Temporary rule to allow all Internet traffic for debugging
+#resource "azurerm_network_security_rule" "temp_allow_all_internet" {
+#  name                        = "temp-allow-all-internet"
+#  resource_group_name         = var.node_resource_group
+# network_security_group_name = var.node_nsg_name
+#  priority                    = 100
+#  direction                   = "Inbound"
+#  access                      = "Allow"
+#  protocol                    = "Tcp"
+#  source_port_range           = "*"
+#  destination_port_ranges     = ["80", "443"]
+#  source_address_prefix       = "Internet"
+#  destination_address_prefix  = "*"
+#}

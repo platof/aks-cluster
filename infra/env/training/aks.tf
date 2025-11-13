@@ -1,14 +1,12 @@
 resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "aks-${var.name}"
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  dns_prefix          = "aks-${var.name}"
-
-  sku_tier = "Free"
-
-  kubernetes_version = var.k8s_version
-
+  name                      = "aks-${var.name}"
+  location                  = var.location
+  resource_group_name       = var.resource_group_name
+  dns_prefix                = "aks-${var.name}"
+  sku_tier                  = "Free"
+  kubernetes_version        = var.k8s_version
   oidc_issuer_enabled       = true
+  private_cluster_enabled   = true
   workload_identity_enabled = true
   node_resource_group       = var.node_resource_group
 
@@ -20,6 +18,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vnet_subnet_id               = azurerm_subnet.aks.id
     only_critical_addons_enabled = true
     max_pods                     = 30
+    temporary_name_for_rotation  = "sysrot01"
     upgrade_settings {
       max_surge = "33%"
     }
@@ -32,10 +31,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
-    network_data_plane  = "cilium"
-    network_policy      = "cilium"
     load_balancer_sku   = "standard"
-    outbound_type       = "userAssignedNATGateway"
+    outbound_type       = "loadBalancer"
+
+    pod_cidr       = "10.244.0.0/16"
+    service_cidr   = "10.240.0.0/16"
+    dns_service_ip = "10.240.0.10"
   }
 
   tags = {
@@ -43,3 +44,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
+  name                        = "internal"
+  kubernetes_cluster_id       = azurerm_kubernetes_cluster.aks.id
+  mode                        = "User"
+  vm_size                     = "Standard_D2s_v3"
+  node_count                  = 1
+  temporary_name_for_rotation = "userrot01"
+
+}
