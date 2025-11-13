@@ -55,3 +55,24 @@ variable "k8s_version" {
   description = "The Kubernetes version to use for the AKS cluster."
   type        = string
 }
+
+variable "admin_username" {
+  description = "Admin username for the Jumpbox VM."
+  type        = string
+  default     = "adminuser"
+}
+
+variable "jumpbox_ssh_public_key" {
+  description = "SSH public key for the Jumpbox VM."
+  type        = string
+}
+
+variable "traefik_chart_version" {
+  description = "Version of the ingress-nginx Helm chart to deploy."
+  type        = string
+}
+
+variable "node_nsg_name" {
+  description = "The name of the Network Security Group associated with the AKS node pool."
+  type        = string
+}
