@@ -67,8 +67,8 @@ variable "jumpbox_ssh_public_key" {
   type        = string
 }
 
-variable "node_nsg_name" {
-  description = "node nsg name"
-  type        = string
+#variable "node_nsg_name" {
+#  description = "node nsg name"
+#  type        = string
 
-}
+#}
