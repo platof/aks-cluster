@@ -34,6 +34,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     load_balancer_sku   = "standard"
     outbound_type       = "loadBalancer"
 
+    pod_cidr       = "10.244.0.0/16"
+    service_cidr   = "10.240.0.0/16"
+    dns_service_ip = "10.240.0.10"
+
 
   }
 
