@@ -14,7 +14,7 @@ resource "azurerm_subnet" "aks" {
 
 }
 
-# NAT Gateway (for deterministic outbound) + Public IP
+# NAT Gateway (for deterministic outbound) + Public IP.....
 resource "azurerm_public_ip" "nat" {
   count               = var.create_nat_gateway ? 1 : 0
   name                = local.nat_public_ip_name
