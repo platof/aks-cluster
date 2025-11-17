@@ -14,6 +14,7 @@ permissions:
 
 env:
   TF_DIR: infra/env/training
+  TF_VAR_jumpbox_ssh_public_key: ${{ secrets.JUMPBOX_SSH_PUBKEY }}
 
 jobs:
   destroy:
