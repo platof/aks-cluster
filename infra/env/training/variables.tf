@@ -65,6 +65,7 @@ variable "admin_username" {
 variable "jumpbox_ssh_public_key" {
   description = "SSH public key for the Jumpbox VM."
   type        = string
+  default     = "dummy"
 }
 
 #variable "node_nsg_name" {
